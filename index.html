@@ -1,11 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Land Measurement</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nepal Land Converter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@200&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; }
+    input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+    [data-system="intl"]   { --bg: #193D2C; --accent: #7DD4A8; }
+    [data-system="ropani"] { --bg: #3C0E1A; --accent: #F4899A; }
+    [data-system="bigha"]  { --bg: #2E1A06; --accent: #F4C47A; }
+
+    .sys-card {
+      background:
+        radial-gradient(ellipse at 92% 0%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 52%),
+        var(--bg);
+    }
+
+    .sys-label { color: var(--accent); }
+
+    .num-input {
+      width: 100%;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: #F0EAD8;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.625rem 0.75rem;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .num-input.centered { text-align: center; padding-left: 0.25rem; padding-right: 0.25rem; }
+    .num-input::placeholder { color: rgba(240,234,216,0.18); }
+    .num-input:hover  { border-color: rgba(255,255,255,0.22); }
+    .num-input:focus  {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+      background: rgba(0,0,0,0.38);
+      outline: none;
+    }
+
+    .card-header  { border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .hint-text    { color: rgba(240,234,216,0.30); }
+    .sub-label    { color: rgba(240,234,216,0.48); font-size: 11px; font-weight: 500; text-align: center; }
+    .sep-char     { color: rgba(240,234,216,0.28); font-weight: 600; font-size: 1.05rem; text-align: center; line-height: 1; }
+    .card-subtitle { color: rgba(240,234,216,0.45); font-size: 11px; }
+
+    .reset-btn {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.08);
+      color: #4A4A5A;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .reset-btn:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.15);
+      color: #8A8A9A;
+    }
+
+    @media (max-width: 480px) {
+      .intl-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-<body>
-    <p>You're up too early.</p>
+<body class="min-h-screen py-10 px-4" style="background:radial-gradient(ellipse at 50% 0%,#1C1C20 0%,#111113 60%,#0D0D0F 100%);">
+
+  <div class="max-w-[580px] mx-auto">
+
+    <!-- Header -->
+    <header class="mb-8 text-center relative py-3 overflow-hidden">
+      <div
+        aria-hidden="true"
+        class="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+        style="font-family:'Noto Sans Devanagari',sans-serif;font-size:8.5rem;font-weight:200;color:#ffffff;opacity:0.04;line-height:1;transform:translateY(4px);"
+      >भूमि</div>
+      <div class="relative">
+        <p style="font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#5A5A6A;margin-bottom:6px;">Nepal</p>
+        <h1 class="text-[1.75rem] font-bold tracking-tight" style="color:#E8E4DC;">Land Measurement Converter</h1>
+        <p class="mt-1.5 text-sm" style="color:#5A5A6A;">Enter any value — all fields update instantly</p>
+      </div>
+    </header>
+
+    <!-- International -->
+    <section data-system="intl" class="sys-card rounded-2xl mb-3 overflow-hidden ring-1 ring-inset ring-white/10" style="box-shadow:0 4px 28px rgba(0,0,0,0.22),0 1px 4px rgba(0,0,0,0.14);">
+      <div class="card-header px-6 pt-5 pb-3">
+        <span class="sys-label text-[10px] font-bold uppercase tracking-[0.18em]">International</span>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-2 gap-3 intl-grid">
+          <div>
+            <div class="sub-label mb-1.5">Square Feet</div>
+            <input id="sqft" type="number" step="any" min="0" inputmode="decimal" placeholder="0" autocomplete="off" class="num-input">
+          </div>
+          <div>
+            <div class="sub-label mb-1.5">Square Meters</div>
+            <input id="sqm" type="number" step="any" min="0" inputmode="decimal" placeholder="0" autocomplete="off" class="num-input">
+          </div>
+          <div>
+            <div class="sub-label mb-1.5">Acres</div>
+            <input id="acres" type="number" step="any" min="0" inputmode="decimal" placeholder="0" autocomplete="off" class="num-input">
+          </div>
+          <div>
+            <div class="sub-label mb-1.5">Hectares</div>
+            <input id="hectares" type="number" step="any" min="0" inputmode="decimal" placeholder="0" autocomplete="off" class="num-input">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ropani System -->
+    <section data-system="ropani" class="sys-card rounded-2xl mb-3 overflow-hidden ring-1 ring-inset ring-white/10" style="box-shadow:0 4px 28px rgba(0,0,0,0.22),0 1px 4px rgba(0,0,0,0.14);">
+      <div class="card-header px-6 pt-5 pb-3 flex items-baseline gap-2">
+        <span class="sys-label text-[10px] font-bold uppercase tracking-[0.18em]">Ropani System</span>
+        <span class="card-subtitle">Hilly / Kathmandu Valley</span>
+      </div>
+      <div class="p-6">
+        <div class="grid mb-1.5" style="grid-template-columns:1fr 1.2rem 1fr 1.2rem 1fr 1.2rem 1fr;">
+          <div class="sub-label">Ropani</div>
+          <div></div>
+          <div class="sub-label">Aana</div>
+          <div></div>
+          <div class="sub-label">Paisa</div>
+          <div></div>
+          <div class="sub-label">Dam</div>
+        </div>
+        <div class="grid items-center" style="grid-template-columns:1fr 1.2rem 1fr 1.2rem 1fr 1.2rem 1fr;">
+          <input id="ropani" type="number" step="any" min="0" inputmode="numeric" placeholder="0" autocomplete="off" class="num-input centered">
+          <div class="sep-char">—</div>
+          <input id="aana"   type="number" step="any" min="0" max="15" inputmode="numeric" placeholder="0" autocomplete="off" class="num-input centered">
+          <div class="sep-char">—</div>
+          <input id="paisa"  type="number" step="any" min="0" max="3"  inputmode="numeric" placeholder="0" autocomplete="off" class="num-input centered">
+          <div class="sep-char">—</div>
+          <input id="dam"    type="number" step="any" min="0" max="3"  inputmode="numeric" placeholder="0" autocomplete="off" class="num-input centered">
+        </div>
+        <p class="hint-text mt-3 text-[11px]">1 Ropani = 16 Aana &nbsp;·&nbsp; 1 Aana = 4 Paisa &nbsp;·&nbsp; 1 Paisa = 4 Dam &nbsp;·&nbsp; 1 Ropani ≈ 5,476 sq ft</p>
+      </div>
+    </section>
+
+    <!-- Bigha System -->
+    <section data-system="bigha" class="sys-card rounded-2xl mb-5 overflow-hidden ring-1 ring-inset ring-white/10" style="box-shadow:0 4px 28px rgba(0,0,0,0.22),0 1px 4px rgba(0,0,0,0.14);">
+      <div class="card-header px-6 pt-5 pb-3 flex items-baseline gap-2">
+        <span class="sys-label text-[10px] font-bold uppercase tracking-[0.18em]">Bigha System</span>
+        <span class="card-subtitle">Terai</span>
+      </div>
+      <div class="p-6">
+        <div class="grid mb-1.5" style="grid-template-columns:1fr 1.2rem 1fr 1.2rem 1fr;">
+          <div class="sub-label">Bigha</div>
+          <div></div>
+          <div class="sub-label">Kattha</div>
+          <div></div>
+          <div class="sub-label">Dhur</div>
+        </div>
+        <div class="grid items-center" style="grid-template-columns:1fr 1.2rem 1fr 1.2rem 1fr;">
+          <input id="bigha"  type="number" step="any" min="0" inputmode="numeric" placeholder="0" autocomplete="off" class="num-input centered">
+          <div class="sep-char">—</div>
+          <input id="kattha" type="number" step="any" min="0" max="19" inputmode="numeric" placeholder="0" autocomplete="off" class="num-input centered">
+          <div class="sep-char">—</div>
+          <input id="dhur"   type="number" step="any" min="0" max="19" inputmode="numeric" placeholder="0" autocomplete="off" class="num-input centered">
+        </div>
+        <p class="hint-text mt-3 text-[11px]">1 Bigha = 20 Kattha &nbsp;·&nbsp; 1 Kattha = 20 Dhur &nbsp;·&nbsp; 1 Bigha ≈ 72,900 sq ft</p>
+      </div>
+    </section>
+
+    <button id="reset-btn" class="reset-btn">Reset All</button>
+
+  </div>
+
+  <script>
+    const ROPANI_SQFT = 5476;
+    const BIGHA_SQFT  = 72900;
+
+    const F = Object.freeze({
+      sqm:      1 / 0.09290304,
+      acres:    43560,
+      hectares: 10000 / 0.09290304,
+      ropani:   ROPANI_SQFT,
+      aana:     ROPANI_SQFT / 16,
+      paisa:    ROPANI_SQFT / 64,
+      dam:      ROPANI_SQFT / 256,
+      bigha:    BIGHA_SQFT,
+      kattha:   BIGHA_SQFT / 20,
+      dhur:     BIGHA_SQFT / 400,
+    });
+
+    const FIELD_IDS = ['sqft','sqm','acres','hectares','ropani','aana','paisa','dam','bigha','kattha','dhur'];
+    const ELS = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+      FIELD_IDS.forEach(id => { ELS[id] = document.getElementById(id); });
+
+      ['sqft','sqm','acres','hectares'].forEach(id => {
+        ELS[id].addEventListener('input', () => convert(id));
+      });
+      ['ropani','aana','paisa','dam'].forEach(id => {
+        ELS[id].addEventListener('input', () => convert('ropani-group'));
+      });
+      ['bigha','kattha','dhur'].forEach(id => {
+        ELS[id].addEventListener('input', () => convert('bigha-group'));
+      });
+
+      document.getElementById('reset-btn').addEventListener('click', resetAll);
+    });
+
+    function getVal(id) {
+      const v = parseFloat(ELS[id].value);
+      if (!isFinite(v) || isNaN(v)) return null;
+      return Math.max(0, v);
+    }
+
+    function toSqFt(src) {
+      switch (src) {
+        case 'sqft':     { const x = getVal('sqft');     return x === null ? null : x; }
+        case 'sqm':      { const x = getVal('sqm');      return x === null ? null : x * F.sqm; }
+        case 'acres':    { const x = getVal('acres');    return x === null ? null : x * F.acres; }
+        case 'hectares': { const x = getVal('hectares'); return x === null ? null : x * F.hectares; }
+        case 'ropani-group': {
+          const r = getVal('ropani'), a = getVal('aana'), p = getVal('paisa'), d = getVal('dam');
+          if (r === null && a === null && p === null && d === null) return null;
+          return (r ?? 0) * F.ropani + (a ?? 0) * F.aana + (p ?? 0) * F.paisa + (d ?? 0) * F.dam;
+        }
+        case 'bigha-group': {
+          const b = getVal('bigha'), k = getVal('kattha'), d = getVal('dhur');
+          if (b === null && k === null && d === null) return null;
+          return (b ?? 0) * F.bigha + (k ?? 0) * F.kattha + (d ?? 0) * F.dhur;
+        }
+      }
+      return null;
+    }
+
+    function breakRopani(sqft) {
+      let d = Math.max(0, Math.round(sqft / F.dam));
+      const ropani = Math.floor(d / 256); d %= 256;
+      const aana   = Math.floor(d / 16);  d %= 16;
+      const paisa  = Math.floor(d / 4);
+      const dam    = d % 4;
+      return { ropani, aana, paisa, dam };
+    }
+
+    function breakBigha(sqft) {
+      let d = Math.max(0, Math.round(sqft / F.dhur));
+      const bigha  = Math.floor(d / 400); d %= 400;
+      const kattha = Math.floor(d / 20);
+      const dhur   = d % 20;
+      return { bigha, kattha, dhur };
+    }
+
+    function fmt(n) {
+      if (n === null || !isFinite(n)) return '';
+      return parseFloat(n.toFixed(6)).toString();
+    }
+
+    function setVal(el, val, asInt = false) {
+      if (document.activeElement === el) return;
+      if (val === null) { el.value = ''; return; }
+      el.value = asInt ? String(val) : fmt(val);
+    }
+
+    function convert(src) {
+      const sqft = toSqFt(src);
+      const nil  = sqft === null;
+
+      if (src !== 'sqft')     setVal(ELS.sqft,     nil ? null : sqft);
+      if (src !== 'sqm')      setVal(ELS.sqm,      nil ? null : sqft / F.sqm);
+      if (src !== 'acres')    setVal(ELS.acres,     nil ? null : sqft / F.acres);
+      if (src !== 'hectares') setVal(ELS.hectares,  nil ? null : sqft / F.hectares);
+
+      if (src !== 'ropani-group') {
+        const b = nil ? { ropani: null, aana: null, paisa: null, dam: null } : breakRopani(sqft);
+        setVal(ELS.ropani, b.ropani, true);
+        setVal(ELS.aana,   b.aana,   true);
+        setVal(ELS.paisa,  b.paisa,  true);
+        setVal(ELS.dam,    b.dam,    true);
+      }
+
+      if (src !== 'bigha-group') {
+        const b = nil ? { bigha: null, kattha: null, dhur: null } : breakBigha(sqft);
+        setVal(ELS.bigha,  b.bigha,  true);
+        setVal(ELS.kattha, b.kattha, true);
+        setVal(ELS.dhur,   b.dhur,   true);
+      }
+    }
+
+    function resetAll() {
+      FIELD_IDS.forEach(id => { ELS[id].value = ''; });
+    }
+  </script>
 </body>
 </html>
